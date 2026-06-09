@@ -120,8 +120,10 @@
             btn.innerText = loadingText;
             
             try {
+                // FIXED: Enforced text/plain to bypass Apps Script CORS blocks
                 const response = await fetch(API_URL, {
                     method: 'POST',
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify({ action: actionStr, username: username })
                 });
                 const result = await response.json();
@@ -149,8 +151,10 @@
             row.classList.add('row-completing');
             
             try {
+                // FIXED: Enforced text/plain headers here as well
                 await fetch(API_URL, {
                     method: 'POST',
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify({ action: "mark_done", milestoneName: milestoneName })
                 });
                 fetchOSRSData();
@@ -214,7 +218,16 @@
                 const lockBadge = isLocked ? `<span class="lock-badge">🔒 Locked</span>` : "";
                 
                 const safeName = item.name.replace(/ /g, '_');
-                const imgSrc = `https://oldschool.runescape.wiki/wiki/Special:FilePath/${safeName}.png`;
+                let imgSrc;
+                
+                // FIXED: Catch Quests and Unlocks to prevent CORB image spam
+                if (item.type === "Quest") {
+                    imgSrc = "https://oldschool.runescape.wiki/images/Quest_icon.png";
+                } else if (item.type === "Unlock" || item.name.includes("Diary")) {
+                    imgSrc = "https://oldschool.runescape.wiki/images/Achievement_Diaries_icon.png";
+                } else {
+                    imgSrc = `https://oldschool.runescape.wiki/wiki/Special:FilePath/${safeName}.png`;
+                }
 
                 const row = document.createElement('div');
                 row.className = 'item-row';
