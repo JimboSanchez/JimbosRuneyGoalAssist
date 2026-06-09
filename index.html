@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSRS Ironman Tracker</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #d4d4d4;
+            font-family: 'Trebuchet MS', Consolas, sans-serif;
+            margin: 0;
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #ff981f;
+            text-shadow: 2px 2px 0px #000;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        /* Search Bar UI */
+        .search-bar {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .search-bar input {
+            padding: 10px 15px;
+            font-size: 1.1rem;
+            border: 2px solid #3b3b3b;
+            border-radius: 5px 0 0 5px;
+            background: #242424;
+            color: #fff;
+            outline: none;
+            width: 250px;
+        }
+        .search-bar button {
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            border: 2px solid #ff981f;
+            background: #ff981f;
+            color: #1a1a1a;
+            font-weight: bold;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .search-bar button:hover { background: #e6891c; }
+
+        /* Grid Layout */
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            max-width: 1400px;
+            margin: auto;
+        }
+        .panel {
+            background-color: #242424;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 4px 6px rgba(0,0,0,0.5);
+        }
+        .panel h2 {
+            margin-top: 0;
+            color: #ff981f;
+            border-bottom: 2px solid #3b3b3b;
+            padding-bottom: 10px;
+            text-shadow: 1px 1px 0px #000;
+            font-size: 1.3rem;
+        }
+        .item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #333;
+        }
+        .item-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .item-icon {
+            width: 25px;
+            height: 25px;
+            object-fit: contain;
+            filter: drop-shadow(2px 2px 1px rgba(0,0,0,0.8));
+        }
+        .item-name { 
+            text-decoration: none; 
+            font-weight: bold; 
+            font-size: 1.1rem;
+        }
+        .item-name:hover { text-decoration: underline; }
+        .time-label { color: #888; font-size: 0.95rem; }
+        
+        /* Category Colors */
+        .Quest { color: #00ff00; }
+        .Item { color: #ffff00; }
+        .Unlock { color: #cc66ff; }
+        
+        /* NEW Locked Styling (No more strikethrough) */
+        .locked { 
+            color: #777 !important; 
+        }
+        .locked-icon {
+            opacity: 0.3;
+            filter: grayscale(100%);
+        }
+        .lock-badge {
+            font-size: 0.75rem;
+            background: #3b1a1a;
+            color: #ff4d4d;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 10px;
+            vertical-align: middle;
+            border: 1px solid #552222;
+        }
+		.item-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .done-btn {
+            background: transparent;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            border-radius: 4px;
+            padding: 3px 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .done-btn:hover {
+            background: #00ff00;
+            color: #1a1a1a;
+        }
+        .row-completing {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>IRONMAN DASHBOARD</h1>
+    
+    <div class="search-bar">
+        <input type="text" id="rsn" placeholder="Enter OSRS Username...">
+        <button id="search-btn" onclick="handleSearch()">Fetch Stats</button>
+    </div>
+    
+    <div class="container">
+        <div class="panel">
+            <h2>Top 5 Easy Wins</h2>
+            <div id="easy-wins">Loading secure data...</div>
+        </div>
+        <div class="panel">
+            <h2>Best Longterm Investments</h2>
+            <div id="best-investments">Loading secure data...</div>
+        </div>
+        <div class="panel">
+            <h2>Easy Grinds (< 2 Hrs)</h2>
+            <div id="easy-grinds">Loading secure data...</div>
+        </div>
+        <div class="panel">
+            <h2>Medium Grinds (2 - 5 Hrs)</h2>
+            <div id="medium-grinds">Loading secure data...</div>
+        </div>
+        <div class="panel">
+            <h2>Long Grinds (> 5 Hrs)</h2>
+            <div id="long-grinds">Loading secure data...</div>
+        </div>
+    </div>
+
+    <script>
+        // --- PASTE YOUR NEW GOOGLE WEB APP URL HERE ---
+        const API_URL = "https://script.google.com/macros/s/AKfycbwr5wXGuYywbH6TUaUkXHkg2YWCubc6ou0p333ZMRLeTDc5Dr0GRKn__sZs8mGXnER9/exec";
+
+        async function handleSearch() {
+            const username = document.getElementById('rsn').value;
+            if (!username) return;
+            
+            const btn = document.getElementById('search-btn');
+            btn.innerText = "Syncing...";
+            
+            try {
+                // Sends the username to your Google Sheet
+                await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "fetch_stats", username: username })
+                });
+                btn.innerText = "Success!";
+                setTimeout(() => { btn.innerText = "Fetch Stats"; }, 3000);
+            } catch (err) {
+                btn.innerText = "Error!";
+                setTimeout(() => { btn.innerText = "Fetch Stats"; }, 3000);
+            }
+        }
+
+        async function fetchOSRSData() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error("Network response was not ok");
+                const rawData = await response.json();
+                
+                const parsedData = rawData.map(item => {
+                    const reqsText = (item['Missing Reqs'] || "").toString().trim().toLowerCase();
+                    return {
+                        name: item['Milestone Name'] || item['Name'] || item['Milestone'] || "Unknown",
+                        type: item['Type'] || "Item",
+                        time: parseFloat(item['Time Taken']) || 0,
+                        impact: parseInt(item['Milestones Unlocked']) || 0,
+                        completed: item['Completed'] === true || item['Completed'] === "TRUE" || item['Completed'] === "true",
+                        isReqsMet: (reqsText === "all reqs met!" || reqsText === "all reqs met" || reqsText === "none" || reqsText === "")
+                    };
+                });
+
+                const incomplete = parsedData.filter(i => !i.completed);
+                
+                let easyWins = incomplete.filter(i => i.isReqsMet);
+                easyWins.sort((a, b) => a.time - b.time);
+                renderList("easy-wins", easyWins.slice(0, 5));
+
+                let bestInv = incomplete.filter(i => i.impact > 0);
+                bestInv.sort((a, b) => {
+                    const impactDiff = b.impact - a.impact;
+                    if (impactDiff !== 0) return impactDiff;
+                    return a.time - b.time;
+                });
+                renderList("best-investments", bestInv.slice(0, 5));
+
+                let easyGrinds = incomplete.filter(i => i.time < 2);
+                easyGrinds.sort((a, b) => a.time - b.time);
+                renderList("easy-grinds", easyGrinds);
+
+                let medGrinds = incomplete.filter(i => i.time >= 2 && i.time <= 5);
+                medGrinds.sort((a, b) => a.time - b.time);
+                renderList("medium-grinds", medGrinds);
+
+                let longGrinds = incomplete.filter(i => i.time > 5);
+                longGrinds.sort((a, b) => a.time - b.time);
+                renderList("long-grinds", longGrinds);
+
+            } catch (error) {
+                document.querySelectorAll('[id$="-wins"], [id$="-grinds"], [id$="-investments"]').forEach(el => {
+                    el.innerHTML = `<span style="color:#ff4d4d;">Failed to load data.</span>`;
+                });
+            }
+        }
+
+// NEW FUNCTION: Sends the done command to Google Sheets
+        async function markDone(buttonElement, milestoneName) {
+            // Give instant UI feedback
+            buttonElement.innerText = "⏳";
+            const row = buttonElement.closest('.item-row');
+            row.classList.add('row-completing');
+            
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "mark_done", milestoneName: milestoneName })
+                });
+                // Once Google confirms it's saved, refresh the whole board!
+                fetchOSRSData();
+            } catch (err) {
+                buttonElement.innerText = "❌";
+                row.classList.remove('row-completing');
+            }
+        }
+
+        // UPDATED FUNCTION: Injects the button into the HTML
+        function renderList(elementId, items) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = "";
+            
+            if (items.length === 0) {
+                container.innerHTML = "<div class='time-label' style='padding:10px 0;'>No active tasks.</div>";
+                return;
+            }
+
+            items.forEach(item => {
+                const isLocked = !item.isReqsMet;
+                const textClass = isLocked ? "locked" : "";
+                const imgClass = isLocked ? "locked-icon" : "";
+                const lockBadge = isLocked ? `<span class="lock-badge">🔒 Locked</span>` : "";
+                
+                const safeName = item.name.replace(/ /g, '_');
+                const imgSrc = `https://oldschool.runescape.wiki/wiki/Special:FilePath/${safeName}.png`;
+
+                const row = document.createElement('div');
+                row.className = 'item-row';
+                // Note the new .item-right container holding the time and button
+                row.innerHTML = `
+                    <div class="item-left">
+                        <img src="${imgSrc}" class="item-icon ${imgClass}" onerror="this.style.display='none'">
+                        <a href="https://oldschool.runescape.wiki/w/${safeName}" target="_blank" 
+                           class="item-name ${item.type} ${textClass}">
+                           ${item.name}
+                        </a>
+                        ${lockBadge}
+                    </div>
+                    <div class="item-right">
+                        <span class="time-label">${item.time} Hrs</span>
+                        <button class="done-btn" onclick="markDone(this, '${item.name}')">✓</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        fetchOSRSData();
+    </script>
+</body>
+</html>
