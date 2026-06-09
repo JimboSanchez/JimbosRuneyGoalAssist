@@ -5,116 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSRS Ironman Tracker</title>
     <style>
-        body {
-            background-color: #1a1a1a;
-            color: #d4d4d4;
-            font-family: 'Trebuchet MS', Consolas, sans-serif;
-            margin: 0;
-            padding: 30px;
-        }
-        h1 {
-            text-align: center;
-            color: #ff981f;
-            text-shadow: 2px 2px 0px #000;
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-        }
+        body { background-color: #1a1a1a; color: #d4d4d4; font-family: 'Trebuchet MS', Consolas, sans-serif; margin: 0; padding: 30px; }
+        h1 { text-align: center; color: #ff981f; text-shadow: 2px 2px 0px #000; font-size: 2.5rem; margin-bottom: 20px; }
         
-        /* Search Bar & Nav UI */
-        .header-controls {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .search-bar input {
-            padding: 10px 15px;
-            font-size: 1.1rem;
-            border: 2px solid #3b3b3b;
-            border-radius: 5px 0 0 5px;
-            background: #242424;
-            color: #fff;
-            outline: none;
-            width: 250px;
-        }
-        .search-bar button {
-            padding: 10px 20px;
-            font-size: 1.1rem;
-            border: 2px solid #ff981f;
-            background: #ff981f;
-            color: #1a1a1a;
-            font-weight: bold;
-            border-radius: 0 5px 5px 0;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .search-bar button:hover { background: #e6891c; }
+        .header-controls { text-align: center; margin-bottom: 30px; }
+        .search-bar input { padding: 10px 15px; font-size: 1.1rem; border: 2px solid #3b3b3b; border-radius: 5px 0 0 5px; background: #242424; color: #fff; outline: none; width: 200px; }
+        .search-bar button { padding: 10px 15px; font-size: 1rem; border: 2px solid #3b3b3b; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        
+        #search-btn { background: #ff981f; border-color: #ff981f; color: #1a1a1a; border-radius: 0 5px 5px 0; }
+        #search-btn:hover { background: #e6891c; }
+        #retro-btn { background: #cc66ff; border-color: #cc66ff; color: #1a1a1a; border-radius: 5px; margin-left: 10px; }
+        #wiki-btn { background: #00ff00; border-color: #00ff00; color: #1a1a1a; border-radius: 5px; margin-left: 10px; }
 
-        /* Tab Navigation */
-        .tab-container {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .tab-btn {
-            background: #242424;
-            border: 2px solid #3b3b3b;
-            color: #888;
-            padding: 10px 25px;
-            font-size: 1.1rem;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-        .tab-btn.active {
-            border-color: #ff981f;
-            color: #ff981f;
-            background: #3a2a18;
-        }
+        .tab-container { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+        .tab-btn { background: #242424; border: 2px solid #3b3b3b; color: #888; padding: 10px 25px; font-size: 1.1rem; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .tab-btn.active { border-color: #ff981f; color: #ff981f; background: #3a2a18; }
 
-        /* Views Layout */
         .view-section { display: none; }
         .view-section.active { display: block; }
         
-        .container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 25px;
-            max-width: 1200px;
-            margin: auto;
-        }
-        
-        /* Master List Specifics */
-        .master-list-container {
-            max-width: 1000px;
-            margin: auto;
-        }
-        .master-list-container .panel {
-            max-height: 70vh;
-            overflow-y: auto;
-        }
+        .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; max-width: 1200px; margin: auto; }
+        .master-list-container { max-width: 1000px; margin: auto; }
+        .master-list-container .panel { max-height: 70vh; overflow-y: auto; }
 
-        .panel {
-            background-color: #242424;
-            border: 2px solid #000;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 4px 6px rgba(0,0,0,0.5);
-        }
-        .panel h2 {
-            margin-top: 0;
-            color: #ff981f;
-            border-bottom: 2px solid #3b3b3b;
-            padding-bottom: 10px;
-            font-size: 1.3rem;
-        }
-        .item-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #333;
-        }
+        .panel { background-color: #242424; border: 2px solid #000; border-radius: 8px; padding: 20px; box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 4px 6px rgba(0,0,0,0.5); }
+        .panel h2 { margin-top: 0; color: #ff981f; border-bottom: 2px solid #3b3b3b; padding-bottom: 10px; font-size: 1.3rem; }
+        
+        .item-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #333; }
         .item-left { display: flex; align-items: center; gap: 12px; }
         .item-right { display: flex; align-items: center; gap: 15px; }
         
@@ -123,25 +40,15 @@
         .item-name:hover { text-decoration: underline; }
         .time-label { color: #888; font-size: 0.95rem; }
         
-        .Quest { color: #00ff00; }
-        .Item { color: #ffff00; }
-        .Unlock { color: #cc66ff; }
-        
+        .Quest { color: #00ff00; } .Item { color: #ffff00; } .Unlock { color: #cc66ff; }
         .locked { color: #777 !important; }
         .locked-icon { opacity: 0.3; filter: grayscale(100%); }
-        .lock-badge {
-            font-size: 0.75rem; background: #3b1a1a; color: #ff4d4d;
-            padding: 2px 6px; border-radius: 4px; border: 1px solid #552222;
-        }
+        .lock-badge { font-size: 0.75rem; background: #3b1a1a; color: #ff4d4d; padding: 2px 6px; border-radius: 4px; border: 1px solid #552222; }
 
-        .done-btn {
-            background: transparent; border: 1px solid #00ff00; color: #00ff00;
-            border-radius: 4px; padding: 3px 8px; cursor: pointer; font-weight: bold;
-        }
+        .done-btn { background: transparent; border: 1px solid #00ff00; color: #00ff00; border-radius: 4px; padding: 3px 8px; cursor: pointer; font-weight: bold; }
         .done-btn:hover { background: #00ff00; color: #1a1a1a; }
         .row-completing { opacity: 0.4; pointer-events: none; }
         
-        /* Custom scrollbar for the master list */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #1a1a1a; }
         ::-webkit-scrollbar-thumb { background: #ff981f; border-radius: 4px; }
@@ -153,8 +60,10 @@
     
     <div class="header-controls">
         <div class="search-bar">
-            <input type="text" id="rsn" placeholder="Enter OSRS Username...">
+            <input type="text" id="rsn" placeholder="OSRS Username...">
             <button id="search-btn" onclick="handleSearch()">Fetch Stats</button>
+            <button id="retro-btn" onclick="retroSync()">Sync Drops</button>
+            <button id="wiki-btn" onclick="wikiSync()">Sync Quests</button>
         </div>
         
         <div class="tab-container">
@@ -163,7 +72,7 @@
         </div>
     </div>
     
-<div id="view-dashboard" class="view-section active">
+    <div id="view-dashboard" class="view-section active">
         <div class="container">
             <div class="panel">
                 <h2>Easy Wins (< 1 Hr)</h2>
@@ -186,10 +95,9 @@
     </div>
 
     <script>
-        // --- PASTE YOUR NEW GOOGLE WEB APP URL HERE ---
+        // --- PASTE YOUR API URL HERE ---
         const API_URL = "https://script.google.com/macros/s/AKfycbwr5wXGuYywbH6TUaUkXHkg2YWCubc6ou0p333ZMRLeTDc5Dr0GRKn__sZs8mGXnER9/exec";
 
-        // Handle Tab Switching
         function switchTab(target) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
@@ -203,31 +111,37 @@
             }
         }
 
-        async function handleSearch() {
+        async function handleAPIRequest(actionStr, btnId, loadingText) {
             const username = document.getElementById('rsn').value;
-            if (!username) return;
-            const btn = document.getElementById('search-btn');
-            btn.innerText = "Syncing...";
+            if (!username) return alert("Enter Username first.");
+            
+            const btn = document.getElementById(btnId);
+            const originalText = btn.innerText;
+            btn.innerText = loadingText;
             
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: "fetch_stats", username: username })
+                    body: JSON.stringify({ action: actionStr, username: username })
                 });
                 const result = await response.json();
                 
                 if (result.status === "Success") {
-                    btn.innerText = "Success!";
+                    btn.innerText = result.updated !== undefined ? `Synced ${result.updated}!` : "Success!";
                     await fetchOSRSData(); 
                 } else {
-                    btn.innerText = "Player Not Found";
+                    btn.innerText = "Error/Not Found";
                 }
-                setTimeout(() => { btn.innerText = "Fetch Stats"; }, 3000);
+                setTimeout(() => { btn.innerText = originalText; }, 4000);
             } catch (err) {
                 btn.innerText = "Error!";
-                setTimeout(() => { btn.innerText = "Fetch Stats"; }, 3000);
+                setTimeout(() => { btn.innerText = originalText; }, 3000);
             }
         }
+
+        function handleSearch() { handleAPIRequest("fetch_stats", "search-btn", "Syncing..."); }
+        function retroSync() { handleAPIRequest("retro_sync", "retro-btn", "Reading Drops..."); }
+        function wikiSync() { handleAPIRequest("wiki_sync", "wiki-btn", "Reading Quests..."); }
 
         async function markDone(buttonElement, milestoneName) {
             buttonElement.innerText = "⏳";
@@ -249,7 +163,6 @@
         async function fetchOSRSData() {
             try {
                 const response = await fetch(API_URL);
-                if (!response.ok) throw new Error("Network response was not ok");
                 const rawData = await response.json();
                 
                 const parsedData = rawData.map(item => {
@@ -266,17 +179,14 @@
 
                 const incomplete = parsedData.filter(i => !i.completed);
                 
-                // PANEL 1: Easy Wins (< 1 Hour AND Reqs Met)
                 let easyWins = incomplete.filter(i => i.isReqsMet && i.time <= 1);
                 easyWins.sort((a, b) => a.time - b.time);
-                renderList("easy-wins", easyWins.slice(0, 10)); // Show top 10
+                renderList("easy-wins", easyWins.slice(0, 10));
 
-                // PANEL 2: Next Grind (Highest Impact AND Reqs Met)
                 let nextGrind = incomplete.filter(i => i.isReqsMet && i.impact > 0);
                 nextGrind.sort((a, b) => b.impact - a.impact || a.time - b.time);
-                renderList("next-grind", nextGrind.slice(0, 10)); // Show top 10
+                renderList("next-grind", nextGrind.slice(0, 10));
 
-                // MASTER PANEL: All Tasks (Sorted Alphabetically)
                 let allTasks = [...incomplete];
                 allTasks.sort((a, b) => a.name.localeCompare(b.name));
                 renderList("all-tasks", allTasks);
